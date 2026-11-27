@@ -17,7 +17,6 @@ os.environ["OPENCV_LOG_LEVEL"] = "SILENT"
 os.environ["OPENCV_FFMPEG_LOGLEVEL"] = "-8"
 import cv2
 
-
 CAMERAS = ("10.2.8.20", "10.2.8.21", "10.2.8.22")
 
 
@@ -34,10 +33,16 @@ def stream_camera(source, destinations, stop, report, preview):
     elapsed = -1
     path = None
     try:
-        params = [cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 8000,
-                  cv2.CAP_PROP_READ_TIMEOUT_MSEC, 5000]
+        params = [
+            cv2.CAP_PROP_OPEN_TIMEOUT_MSEC,
+            8000,
+            cv2.CAP_PROP_READ_TIMEOUT_MSEC,
+            5000,
+        ]
         if not cap.open(source, cv2.CAP_FFMPEG, params):
-            raise ValueError("เปิดกล้องไม่ได้ กรุณาตรวจ IP, พอร์ต, พาธ, รหัสผ่าน และเครือข่าย")
+            raise ValueError(
+                "เปิดกล้องไม่ได้ กรุณาตรวจ IP, พอร์ต, พาธ, รหัสผ่าน และเครือข่าย"
+            )
         fps = cap.get(cv2.CAP_PROP_FPS)
         if not math.isfinite(fps) or not 0 < fps <= 240:
             fps = 25.0
@@ -57,8 +62,9 @@ def stream_camera(source, destinations, stop, report, preview):
             h, w = frame.shape[:2]
             if writer is None:
                 size = (w, h)
-                writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"mp4v"),
-                                         fps, size)
+                writer = cv2.VideoWriter(
+                    str(path), cv2.VideoWriter_fourcc(*"mp4v"), fps, size
+                )
                 if not writer.isOpened():
                     raise ValueError("สร้างไฟล์ MP4 ไม่ได้ กรุณาตรวจโฟลเดอร์ปลายทาง")
             if (w, h) != size:
@@ -92,9 +98,11 @@ def main():
     ttk.Label(panel, text="กล้อง RTSP").grid(row=0, column=0, sticky="w")
     camera = ttk.Combobox(panel, textvariable=host, values=CAMERAS, state="readonly")
     camera.grid(row=0, column=1, sticky="ew", pady=4)
-    folder = tk.StringVar(value=str(Path.home() / "Videos" / "RTSP"))
+    folder = tk.StringVar(value=r"E:\RMUTL\object DET 101\videos")
     ttk.Label(panel, text="โฟลเดอร์ปลายทาง").grid(row=1, column=0, sticky="w")
-    ttk.Entry(panel, textvariable=folder, width=45).grid(row=1, column=1, sticky="ew", pady=4)
+    ttk.Entry(panel, textvariable=folder, width=45).grid(
+        row=1, column=1, sticky="ew", pady=4
+    )
 
     def choose_folder():
         selected = filedialog.askdirectory()
@@ -142,10 +150,14 @@ def main():
         preview_window = tk.Toplevel(root)
         preview_window.title(f"ภาพสด {host.get()}")
         preview_window.geometry("900x720")
-        preview_record = ttk.Button(preview_window, text="เริ่มบันทึก", command=begin_recording)
+        preview_record = ttk.Button(
+            preview_window, text="เริ่มบันทึก", command=begin_recording
+        )
         preview_record.pack(side="bottom", pady=3)
         ttk.Label(preview_window, textvariable=status).pack(side="bottom")
-        preview_label = ttk.Label(preview_window, text="กำลังเปิดภาพสด…", anchor="center")
+        preview_label = ttk.Label(
+            preview_window, text="กำลังเปิดภาพสด…", anchor="center"
+        )
         preview_label.pack(fill="both", expand=True)
         preview_window.bind("<KeyPress-q>", lambda event: stop.set())
         preview_window.protocol("WM_DELETE_WINDOW", stop.set)
@@ -154,7 +166,9 @@ def main():
 
         def run():
             try:
-                message = stream_camera(source, destinations, stop, events.put, frames.append)
+                message = stream_camera(
+                    source, destinations, stop, events.put, frames.append
+                )
             except (ValueError, OSError) as exc:
                 message = str(exc)
             except Exception:
@@ -171,7 +185,9 @@ def main():
     stop_button = ttk.Button(bar, text="หยุด", command=stop.set)
     start_button.pack(side="left", padx=3)
     stop_button.pack(side="left", padx=3)
-    ttk.Label(panel, textvariable=status, wraplength=510).grid(row=3, columnspan=3, sticky="w")
+    ttk.Label(panel, textvariable=status, wraplength=510).grid(
+        row=3, columnspan=3, sticky="w"
+    )
 
     def toggle(active):
         camera.configure(state="disabled" if active else "readonly")
@@ -184,7 +200,9 @@ def main():
         if preview_window is not None and frames:
             frame = cv2.resize(frames.pop(), (900, 720))
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            photo = tk.PhotoImage(data=b"P6\n900 720\n255\n" + rgb.tobytes(), format="PPM")
+            photo = tk.PhotoImage(
+                data=b"P6\n900 720\n255\n" + rgb.tobytes(), format="PPM"
+            )
             preview_label.configure(image=photo)
             preview_label.image = photo
             if status.get() == "กำลังเชื่อมต่อกล้อง…":

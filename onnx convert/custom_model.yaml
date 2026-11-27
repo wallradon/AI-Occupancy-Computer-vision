@@ -1,0 +1,10 @@
+type: yolov8
+name: custom_person_model
+display_name: Custom Person Detector 3
+model_path: "E:/RMUTL/object DET 101/yolo/model/3best.onnx"
+input_width: 640
+input_height: 640
+confidence_threshold: 0.25
+nms_threshold: 0.45
+classes:
+  - person
